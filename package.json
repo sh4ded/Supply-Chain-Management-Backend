@@ -1,0 +1,29 @@
+{
+  "name": "scm-project",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "simple supply chain management",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon app"
+  },
+  "author": "sujith vishal",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^5.0.1",
+    "body-parser": "^1.20.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.1",
+    "express": "^4.18.1",
+    "heroku": "^7.60.2",
+    "http-error": "^0.0.6",
+    "jsonwebtoken": "^8.5.1",
+    "moment": "^2.29.3",
+    "morgan": "^1.10.0",
+    "mysql2": "^2.3.3",
+    "pg": "^8.7.3",
+    "uuid": "^8.3.2",
+    "uuid-int": "^3.1.0"
+  }
+}
