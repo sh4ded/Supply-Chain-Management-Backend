@@ -11,11 +11,11 @@ router.post('/login',loginUser)
 
 router.post('/addOrder',checkAuthUser,addOrder)
 
+router.post('/orders/:id',checkAuthUser,getOrderById)
+
 router.post('/orders/:specific',checkAuthUser,getSpecificOrders)
 
 router.post('/orders',checkAuthUser,getAllOrders)
-
-router.get('/orders/:id',checkAuthUser,getOrderById)
 
 router.post('/price',checkAuthUser,getPrice)
 

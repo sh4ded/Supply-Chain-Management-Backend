@@ -130,6 +130,7 @@ export const addOrder=async (req,res)=>{
          res.status(500).json({error:{
              'message':err.message
          }})
+     else
          res.status(201).json({
              'success':true,
              order_id:order.order_id,
@@ -149,6 +150,7 @@ export const getSpecificOrders=(req,res)=>{
     db.query('select * from orders where status =? and user_id=?',[specific,res.locals.user_id],(err,result,fields)=>{
         if(err)
         res.status(500).json({error:{'message':err.message}})
+    else
         res.status(201).json({orders:result})
     })
 
@@ -158,20 +160,23 @@ export const getAllOrders=(req,res)=>{
     db.query('select * from orders where user_id=?',[res.locals.user_id],(err,result,fields)=>{
         if(err)
         res.status(500).json({error:{'message':err.message}})
+       else
         res.status(201).json({orders:result})
     })
 
 }
 
 export const getOrderById=(req,res)=>{
-    const order_id =req.params.id;
+    const order_id =res.locals.id;
+    console.log(order_id);
     db.query("select * from orders where order_id=?",[order_id],(err,result,fields)=>{
         if(err)
         res.status(500).json({error:{'message':err.message}})
 
-        if(result.length==0){
+        else if(result.length==0){
             res.status(400).json({error:{'message':'order not found'}})
         }
+        else
         res.status(201).json({'order':result})
     })
 
@@ -207,6 +212,7 @@ export const deleteOrderById=(req,res)=>{
         if(fields.affectedRow==0){
             res.status(400).json({error:{'message':"couldn't delete record" }})
         }
+        else
         res.status(200).json({
             'success':true,
             'message':'record deleted successfully'

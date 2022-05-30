@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 
 export const checkAuthUser=(req,res,next)=>{
     console.log(req.body);
+    console.log(req.params);
     let token = req.body.authorization;
     if(!token){
         res.status(403).json({error:{
@@ -18,6 +19,7 @@ export const checkAuthUser=(req,res,next)=>{
             }
             res.locals.user_id=decoded.user_id;
             console.log(res.locals.user_id)
+            res.locals.id = req.params.id;
             next();
 
         })
