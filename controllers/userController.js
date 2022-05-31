@@ -8,6 +8,7 @@ const generate =uuid(0);
 
 
 export const registerUser=(req,res)=>{
+    console.log(req.body);
     const hashedPassword =bcrypt.hashSync(req.body.password,10);
     const user ={
         user_id:generate.uuid(),
