@@ -1,7 +1,9 @@
 import express from 'express'
+import cors from 'cors'
 import { checkAuthUser } from '../middlewares/checkAuth.js';
 import {getAllOrders,deleteOrderById,getPrice, getSpecificOrders, loginUser, registerUser,getOrderById, getUserById, addOrder} from '../controllers/userController.js'
 const router=express.Router();
+router.use(cors());
 
 router.post('/register',registerUser)
 
@@ -9,11 +11,11 @@ router.post('/login',loginUser)
 
 router.post('/addOrder',checkAuthUser,addOrder)
 
+router.post('/orders/:id',checkAuthUser,getOrderById)
+
 router.post('/orders/:specific',checkAuthUser,getSpecificOrders)
 
-router.get('/orders',checkAuthUser,getAllOrders)
-
-router.get('/orders/:id',checkAuthUser,getOrderById)
+router.post('/orders',checkAuthUser,getAllOrders)
 
 router.post('/price',checkAuthUser,getPrice)
 

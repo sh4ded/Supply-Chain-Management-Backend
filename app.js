@@ -9,8 +9,6 @@ import { checkAuthUser,checkAuthAdmin } from './middlewares/checkAuth.js';
 // const generate =uuid(0);
 // console.log(generate.uuid())
 
-
-
 const app=express();
 app.use(express.json())
 app.use(bodyParser.urlencoded({extended:true}))
