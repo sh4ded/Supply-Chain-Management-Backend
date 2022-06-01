@@ -22,6 +22,7 @@ router.post('/myOrders',checkAuthUser,myOrders)
 router.post('/orders',checkAuthUser,getAllOrders)
 
 router.post('/price',checkAuthUser,getPrice)
+router.post('/warehouse/:id',)
 
 router.delete('/order/:id',checkAuthUser,deleteOrderById)
 router.get('/:id',checkAuthUser,getUserById)

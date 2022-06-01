@@ -247,3 +247,13 @@ export const myOrders =(req,res)=>{
     })
 
 }
+
+export const getWarehouse =(req,res)=>{
+    db.query('select * from warehouses where warehouse_id',[req.params.id],(err,result,fields)=>{
+        if(err)
+        res.status(500).json({error:{'message':err.message}})
+    else
+        res.status(201).json({orders:result})
+    })
+
+}
