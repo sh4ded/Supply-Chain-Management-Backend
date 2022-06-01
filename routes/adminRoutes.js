@@ -7,11 +7,11 @@ const router=express.Router();
 
 router.post('/login',adminLogin);
 
-router.get('/orders',checkAuthAdmin,getAllOrders)
+router.post('/orders',checkAuthAdmin,getAllOrders)
 
 //router.get('/orders/:id',getOrderById)
 
-router.get('/orders/:status',checkAuthAdmin,getSpecificOrders)
+router.post('/orders/:status',checkAuthAdmin,getSpecificOrders)
 
 router.put('/orders/approve',checkAuthAdmin,approveOrder)
 

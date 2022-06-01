@@ -40,11 +40,21 @@ export const adminLogin=(req,res)=>{
 }
 
 export const getAllOrders=(req,res)=>{
-    db.query('select * from orders',(err,result,fields)=>{
+    db.query('select warehouse_id from admins where admin_id=?',[res.locals.admin_id],(err,result,fields)=>{
         if(err)
         res.status(500).json({error:{'message':err.message}})
-        res.status(201).json({order:result})
+        else{
+            console.log(result)
+            db.query('select * from orders where source = ?',[result[0].warehouse_id],(err,result,fields)=>{
+                if(err)
+                res.status(500).json({error:{'message':err.message}})
+                else
+                res.status(201).json({order:result})
+            })
+
+        }
     })
+   
 
 }
 
@@ -53,11 +63,16 @@ export const getOrderById=(req,res)=>{
     db.query("select * from orders where order_id=?",[order_id],(err,result,fields)=>{
         if(err)
         res.status(500).json({error:{'message':err.message}})
+        else{
+            if(result.length===0){
+                res.status(400).json({error:{'message':'order not found'}})
+            }
+            else
+            res.status(201).json({'order':result})
 
-        if(result.length===0){
-            res.status(400).json({error:{'message':'order not found'}})
         }
-        res.status(201).json({'order':result})
+
+      
     })
 
 }
@@ -73,9 +88,9 @@ export const updateStatus=(req,res)=>{
     db.query('update orders set status= ? where order_id=?',[status,order_id],(err,result,fields)=>{
         if(err)
         res.status(500).json({error:{'message':err.message}})
-        if(fields.affectedRows<1)
+        else if(fields.affectedRows<1)
         res.status(201).json({'success':false,message:'invalid order_id'})
-
+        else
         res.status(200).json({'success':true,'message':'status updated successfully'})
 
     })
@@ -89,13 +104,23 @@ export const getSpecificOrders=(req,res)=>{
         'message':'your specification is wrong'
     }})
     else{
+        db.query('select warehouse_id from admins where admin_id=?',[res.locals.admin_id],(err,result,fields)=>{
+            if(err)
+            res.status(500).json({error:{'message':err.message}})
+            else{
+                console.log(result)
+                db.query('select * from orders where source = ? and status=?',[result[0].warehouse_id,specific],(err,result,fields)=>{
+                    if(err)
+                    res.status(500).json({error:{'message':err.message}})
+                    else
+                    res.status(201).json({order:result})
+                })
+    
+            }
+        })
 
     
-    db.query('select * from orders where status =?',[specific],(err,result,fields)=>{
-        if(err)
-        res.status(500).json({error:{'message':err.message}})
-        res.status(201).json(result)
-    })
+    
 }
 
 
@@ -143,4 +168,36 @@ export const updateWarehouse =(req,res)=>{
     })
 
 }
+
+export const getVehicles =(req,res)=>{
+    db.query('select warehouse_id from admins where admin_id=?',[res.locals.admin_id],(err,result,fields)=>{
+        if(err)
+        res.status(500).json({error:{'message':err.message}})
+        else{
+            console.log(result)
+            db.query('select * from vehicles where from_location=?',[result[0].warehouse_id],(err,result,fields)=>{
+                if(err)
+                res.status(500).json({error:{'message':err.message}})
+                else
+                res.status(201).json({vehicles:result})
+            })
+
+        }
+    })
+}
+
+export const putVehicles =(req,res)=>{
+    console.log(result)
+    db.query('update  vehicles set allocated_space=? where vehicle_id=?',[result[0].warehouse_id,req.body.vehicle_id],(err,result,fields)=>{
+        if(err)
+        res.status(500).json({error:{'message':err.message}})
+        else
+        res.status(201).json({message:"vehicle updated successfully"})
+    })
+}
+//get vehicle by source
+
+//put vehicle weight
+
+//
 

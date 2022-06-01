@@ -8,6 +8,7 @@ const generate =uuid(0);
 
 
 export const registerUser=(req,res)=>{
+    console.log(req.body);
     const hashedPassword =bcrypt.hashSync(req.body.password,10);
     const user ={
         user_id:generate.uuid(),
@@ -130,6 +131,7 @@ export const addOrder=async (req,res)=>{
          res.status(500).json({error:{
              'message':err.message
          }})
+     else
          res.status(201).json({
              'success':true,
              order_id:order.order_id,
@@ -146,11 +148,15 @@ export const getSpecificOrders=(req,res)=>{
     res.status(400).json({error:{
         'message':'your specification is wrong'
     }})
-    db.query('select * from orders where status =? and user_id=?',[specific,res.locals.user_id],(err,result,fields)=>{
-        if(err)
-        res.status(500).json({error:{'message':err.message}})
-        res.status(201).json({orders:result})
-    })
+    else{
+        db.query('select * from orders where status =? and user_id=?',[specific,res.locals.user_id],(err,result,fields)=>{
+            if(err)
+            res.status(500).json({error:{'message':err.message}})
+        else
+            res.status(201).json({orders:result})
+        })
+    }
+   
 
 }
 
@@ -158,20 +164,23 @@ export const getAllOrders=(req,res)=>{
     db.query('select * from orders where user_id=?',[res.locals.user_id],(err,result,fields)=>{
         if(err)
         res.status(500).json({error:{'message':err.message}})
+       else
         res.status(201).json({orders:result})
     })
 
 }
 
 export const getOrderById=(req,res)=>{
-    const order_id =req.params.id;
+    const order_id =res.locals.id;
+    console.log(order_id);
     db.query("select * from orders where order_id=?",[order_id],(err,result,fields)=>{
         if(err)
         res.status(500).json({error:{'message':err.message}})
 
-        if(result.length==0){
+        else if(result.length==0){
             res.status(400).json({error:{'message':'order not found'}})
         }
+        else
         res.status(201).json({'order':result})
     })
 
@@ -184,16 +193,19 @@ export const getPrice=(req,res)=>{
     db.query("select * from price_plans where from_warehouse=? and to_warehouse =?",[from_warehouse,to_warehouse],(err,result,fields)=>{
         if(err)
         res.status(500).json({error:{'message':err.message}})
+        else{
+            if(result.length===0)
+            res.status(404).json({error:{'message':'invalid warehouses'}})
+            else
+            res.status(201).json({pricing:{
+                from_warehouse,
+                to_warehouse,
+                'price_per_kg':result[0].price_per_kg,
+                'price_plan_name':result[0].price_plan_name
+            }})
+        }
      
-        if(result.length===0)
-        res.status(404).json({error:{'message':'invalid warehouses'}})
-        else
-        res.status(201).json({pricing:{
-            from_warehouse,
-            to_warehouse,
-            'price_per_kg':result[0].price_per_kg,
-            'price_plan_name':result[0].price_plan_name
-        }})
+       
 
     })
 
@@ -204,13 +216,34 @@ export const deleteOrderById=(req,res)=>{
     db.query("delete from orders where order_id=? and user_id=?",[order_id,res.locals.user_id],(err,result,fields)=>{
         if(err)
         res.status(500).json({error:{'message':err.message}})
-        if(fields.affectedRow==0){
+        else if(fields.affectedRow==0){
             res.status(400).json({error:{'message':"couldn't delete record" }})
         }
+        else
         res.status(200).json({
             'success':true,
             'message':'record deleted successfully'
         })
+    })
+
+}
+
+export const yourOrders =(req,res)=>{
+    db.query('select * from orders where (status =? or status=?) and user_id=?',['approved','pending',res.locals.user_id],(err,result,fields)=>{
+        if(err)
+        res.status(500).json({error:{'message':err.message}})
+    else
+        res.status(201).json({orders:result})
+    })
+
+}
+
+export const myOrders =(req,res)=>{
+    db.query('select * from orders where (status =? or status=?) and user_id=?',['rejected','delivered',res.locals.user_id],(err,result,fields)=>{
+        if(err)
+        res.status(500).json({error:{'message':err.message}})
+    else
+        res.status(201).json({orders:result})
     })
 
 }
