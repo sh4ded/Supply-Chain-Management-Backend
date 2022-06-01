@@ -2,12 +2,12 @@ import jwt from "jsonwebtoken";
 
 
 export const checkAuthUser=(req,res,next)=>{
-    let token =req.headers.bearer;
+    let token =req.headers.authorization;
     if(!token){
         res.status(403).json({error:{
             'msg':'no token available in bearer'
         }})
-    }else{2
+    }else{
         token=token.split(' ')[1];
         jwt.verify(token,process.env.secretKey,(err,decoded)=>{
             if(err){
@@ -25,7 +25,7 @@ export const checkAuthUser=(req,res,next)=>{
 }
 
 export const checkAuthAdmin=(req,res,next)=>{
-    let token =req.headers.bearer;
+    let token =req.headers.authorization;
     if(!token){
         res.status(403).json({error:{
             'msg':'no token available in bearer'
