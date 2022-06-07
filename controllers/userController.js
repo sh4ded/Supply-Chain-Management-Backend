@@ -121,7 +121,7 @@ export const addOrder=async (req,res)=>{
      'amount':req.body.amount,
      'status':'pending',
      'order_date':moment(new Date()).format('YYYY-MM-DD'),
-     'expected_date':moment(new Date()).format('YYYY-MM-DD'),
+     'expected_date':null,
      'current_hub':req.body.source,
      "vehicle_id":0
      }
@@ -161,7 +161,17 @@ export const getSpecificOrders=(req,res)=>{
 }
 
 export const getAllOrders=(req,res)=>{
-    db.query('select * from orders where user_id=?',[res.locals.user_id],(err,result,fields)=>{
+    db.query('select * from orders where user_id=? and status in ("pending","approved")',[res.locals.user_id],(err,result,fields)=>{
+        if(err)
+        res.status(500).json({error:{'message':err.message}})
+       else
+        res.status(201).json({orders:result})
+    })
+
+}
+
+export const getAllOrders2=(req,res)=>{
+    db.query('select * from orders where user_id=? and status in ("rejected","delivered")',[res.locals.user_id],(err,result,fields)=>{
         if(err)
         res.status(500).json({error:{'message':err.message}})
        else

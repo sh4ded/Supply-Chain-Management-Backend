@@ -32,12 +32,7 @@ export const adminLogin=(req,res)=>{
             accessToken:token
         })
     }
-
-
-      
-        
     })
-
 }
 
 export const getAllOrders=(req,res)=>{
@@ -52,11 +47,8 @@ export const getAllOrders=(req,res)=>{
                 else
                 res.status(201).json({order:result})
             })
-
         }
-    })
-   
-
+    }) 
 }
 
 export const getOrderById=(req,res)=>{
@@ -71,19 +63,15 @@ export const getOrderById=(req,res)=>{
             }
             else
             res.status(201).json({'order':result})
-
         }
-
-      
     })
-
 }
 
 export const updateStatus=(req,res)=>{
     const warehouse_id=req.body.warehouse_id;
     const status=req.body.status;
     const order_id=req.body.order_id;
-    if(status!=='delivered'&&status!=='accepted'&&status!=='rejected'&&status!=='pending')
+    if(status!=='delivered'&&status!=='approved'&&status!=='rejected'&&status!=='pending')
     res.status(400).json({error:{
         'message':'invalid status option'
     }})
@@ -185,7 +173,8 @@ export const getVehicles =(req,res)=>{
         res.status(500).json({error:{'message':err.message}})
         else{
             console.log(result)
-            db.query('select * from vehicles where from_location=?',[result[0].warehouse_id],(err,result,fields)=>{
+            console.log(req.body)
+            db.query('select * from vehicles where from_location=? and to_location=?',[result[0].warehouse_id, req.body.destination],(err,result,fields)=>{
                 console.log(result)
                 if(err)
                 res.status(500).json({error:{'message':err.message}})
