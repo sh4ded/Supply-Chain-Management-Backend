@@ -2,8 +2,8 @@ import jwt from "jsonwebtoken";
 
 
 export const checkAuthUser=(req,res,next)=>{
-    console.log(req.body);
-    console.log(req.params);
+    //console.log(req.body);
+    //console.log(req.params);
     let token = req.body.authorization;
     if(!token){
         res.status(403).json({error:{
@@ -29,6 +29,7 @@ export const checkAuthUser=(req,res,next)=>{
 
 export const checkAuthAdmin=(req,res,next)=>{
     let token =req.body.authorization;
+    console.log(req.body);
     if(!token){
         res.status(403).json({error:{
             'msg':'no token available in bearer'

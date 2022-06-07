@@ -1,7 +1,7 @@
 import express from 'express'
 import cors from 'cors'
 import { checkAuthUser } from '../middlewares/checkAuth.js';
-import {getAllOrders,deleteOrderById,getPrice, getSpecificOrders, loginUser, registerUser,getOrderById, getUserById, addOrder, yourOrders, myOrders} from '../controllers/userController.js'
+import {getAllOrders,deleteOrderById,getPrice, getSpecificOrders, loginUser, registerUser,getOrderById, getUserById, addOrder, yourOrders, myOrders, getWarehouse} from '../controllers/userController.js'
 const router=express.Router();
 router.use(cors());
 
@@ -22,7 +22,7 @@ router.post('/myOrders',checkAuthUser,myOrders)
 router.post('/orders',checkAuthUser,getAllOrders)
 
 router.post('/price',checkAuthUser,getPrice)
-router.post('/warehouse/:id',)
+router.post('/warehouse/:id',checkAuthUser,getWarehouse)
 
 router.delete('/order/:id',checkAuthUser,deleteOrderById)
 router.get('/:id',checkAuthUser,getUserById)

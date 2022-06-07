@@ -249,6 +249,7 @@ export const myOrders =(req,res)=>{
 }
 
 export const getWarehouse =(req,res)=>{
+    console.log(req.params);
     db.query('select * from warehouses where warehouse_id',[req.params.id],(err,result,fields)=>{
         if(err)
         res.status(500).json({error:{'message':err.message}})

@@ -10,7 +10,6 @@ export const adminLogin=(req,res)=>{
         res.status(400).json({"success":false,
     "message":"please enter valid admin id"})
     }
-
     db.query("select * from admins where admin_id=?",[req.body.admin_id],(err,result,fields)=>{
         if(err)
         res.status(500).json({'message':err.message})
@@ -18,8 +17,9 @@ export const adminLogin=(req,res)=>{
         res.status(404).json({error:{
             'message':'no admin found'
         }})
-
-        if(req.body.password!==result[0].password)
+        console.log(req.body.password);
+        console.log(result[0].password);
+        if(req.body.password!=result[0].password)
         res.status(400).json({'msg':'invalid credentials'})
         else{
         const token =jwt.sign({admin_id:req.body.admin_id},process.env.secretKey,{
@@ -27,7 +27,8 @@ export const adminLogin=(req,res)=>{
         })
 
         res.status(201).json({
-           admin_id: req.body.admin_id,
+            warehouse_id : result[0].warehouse_id,
+            admin_id: req.body.admin_id,
             accessToken:token
         })
     }
@@ -59,7 +60,8 @@ export const getAllOrders=(req,res)=>{
 }
 
 export const getOrderById=(req,res)=>{
-    const order_id =req.params.id;
+    console.log(req.body);
+    const order_id = req.params.id;
     db.query("select * from orders where order_id=?",[order_id],(err,result,fields)=>{
         if(err)
         res.status(500).json({error:{'message':err.message}})
@@ -78,52 +80,60 @@ export const getOrderById=(req,res)=>{
 }
 
 export const updateStatus=(req,res)=>{
+    const warehouse_id=req.body.warehouse_id;
     const status=req.body.status;
     const order_id=req.body.order_id;
-    if(status!=='delivered'&&status!='accepted'&&status!='rejected')
+    if(status!=='delivered'&&status!=='accepted'&&status!=='rejected'&&status!=='pending')
     res.status(400).json({error:{
         'message':'invalid status option'
     }})
-
-    db.query('update orders set status= ? where order_id=?',[status,order_id],(err,result,fields)=>{
+    else{
+    db.query('update orders set status= ?,current_hub= ? where order_id=?',[status,warehouse_id,order_id],(err,result,fields)=>{
         if(err)
         res.status(500).json({error:{'message':err.message}})
-        else if(fields.affectedRows<1)
+        else if(result.affectedRows<1)
         res.status(201).json({'success':false,message:'invalid order_id'})
         else
         res.status(200).json({'success':true,'message':'status updated successfully'})
 
     })
-
+}
 
 }
-export const getSpecificOrders=(req,res)=>{
-    const specific =req.params.status;
-    if(specific!=='pending'&&specific!=='approved'&&specific!=='delivered'&&specific!=='rejected')
-    res.status(400).json({error:{
-        'message':'your specification is wrong'
-    }})
-    else{
+
+export const getPendingOrders=(req,res)=>{
         db.query('select warehouse_id from admins where admin_id=?',[res.locals.admin_id],(err,result,fields)=>{
             if(err)
             res.status(500).json({error:{'message':err.message}})
             else{
                 console.log(result)
-                db.query('select * from orders where source = ? and status=?',[result[0].warehouse_id,specific],(err,result,fields)=>{
+                db.query('select * from orders where source = ? and status = "pending"',[result[0].warehouse_id],(err,result,fields)=>{
                     if(err)
                     res.status(500).json({error:{'message':err.message}})
                     else
-                    res.status(201).json({order:result})
+                    res.status(201).json({orders:result})
                 })
     
             }
-        })
-
-    
-    
+        })   
 }
 
 
+export const getHistoryOrders=(req,res)=>{
+        db.query('select warehouse_id from admins where admin_id=?',[res.locals.admin_id],(err,result,fields)=>{
+            if(err)
+            res.status(500).json({error:{'message':err.message}})
+            else{
+                console.log(result)
+                db.query('select * from orders where source = ? and status in ("delivered","rejected")',[result[0].warehouse_id],(err,result,fields)=>{
+                    if(err)
+                    res.status(500).json({error:{'message':err.message}})
+                    else
+                    res.status(201).json({orders:result})
+                })
+    
+            }
+        })   
 }
 
 export const approveOrder=(req,res)=>{
@@ -176,6 +186,7 @@ export const getVehicles =(req,res)=>{
         else{
             console.log(result)
             db.query('select * from vehicles where from_location=?',[result[0].warehouse_id],(err,result,fields)=>{
+                console.log(result)
                 if(err)
                 res.status(500).json({error:{'message':err.message}})
                 else
@@ -187,14 +198,48 @@ export const getVehicles =(req,res)=>{
 }
 
 export const putVehicles =(req,res)=>{
-    console.log(result)
-    db.query('update  vehicles set allocated_space=? where vehicle_id=?',[result[0].warehouse_id,req.body.vehicle_id],(err,result,fields)=>{
+    console.log(req.body);
+    db.query('select warehouse_id from admins where admin_id=?',[res.locals.admin_id],(err,result,fields)=>{
+        if(err)
+        res.status(500).json({error:{'message':err.message}})
+        else{
+        console.log(result)
+        db.query('update  vehicles set allocated_space=? where vehicle_id=?',[req.body.allocated_space,req.body.vehicle_id],(err,result,fields)=>{
+            db.query('update orders set vehicle_id=?,status="approved",expected_date=DATE_ADD(order_date,interval 3 day) where order_id=?',[req.body.vehicle_id, req.body.order_id], (error, ress, field) => {
+                if(err)
+            res.status(500).json({error:{'message':err.message}})
+            else
+            {
+                if (error)
+                res.status(500).json({error:{'message':err.message}})
+                else
+                res.status(201).json({message:"vehicle updated successfully"})
+            }
+            })
+            })
+        }
+    })
+}
+
+export const rejectOrder = (req,res) => {
+    db.query('update orders set status="rejected" where order_id=?',[req.body.order_id],(err,result,fields)=>{
         if(err)
         res.status(500).json({error:{'message':err.message}})
         else
-        res.status(201).json({message:"vehicle updated successfully"})
+            res.status(201).json({message:"Order Rejected successfully"})
     })
 }
+
+export const getWarehouse =(req,res)=>{
+    console.log(req.params);
+    db.query('select * from warehouses where warehouse_id',[req.params.id],(err,result,fields)=>{
+        if(err)
+        res.status(500).json({error:{'message':err.message}})
+    else
+        res.status(201).json({orders:result})
+    })
+}
+
 //get vehicle by source
 
 //put vehicle weight
